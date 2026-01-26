@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Management Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 25px;
+            width: 350px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 6px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .success {
+            color: green;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Employee Registration</h2>
+
+    <div id="message"></div>
+
+    <form id="employeeForm">
+        <label>Employee ID</label>
+        <input type="text" id="empId">
+
+        <label>Name</label>
+        <input type="text" id="name">
+
+        <label>Department</label>
+        <input type="text" id="department">
+
+        <label>Email</label>
+        <input type="text" id="email">
+
+        <label>Salary</label>
+        <input type="number" id="salary">
+
+        <button type="submit">Register Employee</button>
+    </form>
+</div>
+
+<script>
+    const form = document.getElementById("employeeForm");
+    const message = document.getElementById("message");
+
+    form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const empId = document.getElementById("empId").value.trim();
+        const name = document.getElementById("name").value.trim();
+        const department = document.getElementById("department").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const salary = document.getElementById("salary").value.trim();
+
+        message.innerHTML = "";
+
+        // Validation
+        if (!empId || !name || !department || !email || !salary) {
+            message.innerHTML = "<p class='error'>All fields are mandatory!</p>";
+            return;
+        }
+
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(email)) {
+            message.innerHTML = "<p class='error'>Invalid email format!</p>";
+            return;
+        }
+
+        // Get existing employees
+        let employees = JSON.parse(localStorage.getItem("employees")) || [];
+
+        const employee = {
+            empId,
+            name,
+            department,
+            email,
+            salary
+        };
+
+        employees.push(employee);
+        localStorage.setItem("employees", JSON.stringify(employees));
+
+        message.innerHTML = "<p class='success'>Employee Registered Successfully!</p>";
+        form.reset();
+    });
+</script>
+
+</body>
+</html>

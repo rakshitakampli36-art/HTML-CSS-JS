@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Employee Management Dashboard</title>
+
+<style>
+/* ===== GLOBAL ===== */
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:"Segoe UI",sans-serif;
+}
+html{
+    scroll-behavior:smooth;
+}
+body{
+    background:#f1f5f9;
+    color:#333;
+}
+
+/* ===== NAVBAR ===== */
+nav{
+    background:#0f172a;
+    color:#fff;
+    padding:15px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+nav .logo{
+    font-size:20px;
+    font-weight:600;
+}
+nav ul{
+    list-style:none;
+    display:flex;
+    gap:25px;
+}
+nav ul li a{
+    text-decoration:none;
+    color:#fff;
+    font-size:14px;
+    opacity:.9;
+}
+nav ul li a:hover{
+    opacity:1;
+    text-decoration:underline;
+}
+
+/* ===== HEADER ===== */
+header{
+    text-align:center;
+    padding:50px 20px;
+    background:#1e293b;
+    color:white;
+}
+header p{
+    opacity:.85;
+    margin-top:10px;
+}
+
+/* ===== LAYOUT ===== */
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+}
+.card{
+    background:#fff;
+    border-radius:14px;
+    padding:25px;
+    margin-bottom:30px;
+    box-shadow:0 10px 25px rgba(0,0,0,.1);
+}
+.card h2{
+    margin-bottom:20px;
+    border-left:5px solid #2563eb;
+    padding-left:10px;
+}
+
+/* ===== FORM ===== */
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+.form-grid input,
+.form-grid button{
+    padding:12px;
+    font-size:14px;
+    border-radius:8px;
+}
+.form-grid input{
+    border:1px solid #ccc;
+}
+.form-grid input:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+.form-grid button{
+    grid-column:span 3;
+    border:none;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    font-size:15px;
+}
+.form-grid button:hover{
+    background:#1d4ed8;
+}
+
+/* ===== TABLE ===== */
+.table-wrapper{
+    overflow-x:auto;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+}
+th,td{
+    padding:12px;
+    text-align:center;
+}
+thead{
+    background:#2563eb;
+    color:white;
+}
+tbody tr:nth-child(even){
+    background:#f8fafc;
+}
+tbody tr:hover{
+    background:#e0e7ff;
+}
+.delete-btn{
+    background:#dc2626;
+    color:white;
+    border:none;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+.delete-btn:hover{
+    background:#b91c1c;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+    .form-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+    .form-grid button{
+        grid-column:span 2;
+    }
+}
+@media(max-width:600px){
+    nav{
+        flex-direction:column;
+        gap:10px;
+    }
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+    .form-grid button{
+        grid-column:span 1;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+    <div class="logo">Employee Dashboard</div>
+    <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#add">Add Employee</a></li>
+        <li><a href="#records">Records</a></li>
+        <li><a href="#about">About</a></li>
+    </ul>
+</nav>
+
+<!-- HOME -->
+<header id="home">
+    <h1>Employee Management Dashboard</h1>
+    <p>Responsive Frontend Portfolio Project</p>
+</header>
+
+<div class="container">
+
+    <!-- ADD EMPLOYEE -->
+    <div class="card" id="add">
+        <h2>Add Employee</h2>
+        <form id="employeeForm" class="form-grid">
+            <input type="text" id="empId" placeholder="Employee ID">
+            <input type="text" id="name" placeholder="Full Name">
+            <input type="text" id="dept" placeholder="Department">
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="text" id="salary" placeholder="Salary">
+            <button type="submit">Save Employee</button>
+        </form>
+    </div>
+
+    <!-- RECORDS -->
+    <div class="card" id="records">
+        <h2>Employee Records</h2>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Emp ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Email</th>
+                        <th>Salary</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="card" id="about">
+        <h2>About This Project</h2>
+        <p>
+            This Employee Management Dashboard is a frontend-only application
+            built using HTML, CSS, and JavaScript. It allows users to add, view,
+            and delete employee records with proper input validation and
+            LocalStorage-based data persistence.
+        </p>
+    </div>
+
+</div>
+
+<script>
+let employees = JSON.parse(localStorage.getItem("employees")) || [];
+
+const form = document.getElementById("employeeForm");
+const table = document.getElementById("employeeTable");
+
+form.addEventListener("submit", e=>{
+    e.preventDefault();
+
+    const empId = document.getElementById("empId").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const dept = document.getElementById("dept").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const salary = document.getElementById("salary").value.trim();
+
+    if(!empId || !name || !dept || !email || !salary){
+        alert("All fields are required");
+        return;
+    }
+    if(isNaN(salary)){
+        alert("Salary must be numeric");
+        return;
+    }
+    const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!emailRegex.test(email)){
+        alert("Invalid email format");
+        return;
+    }
+
+    employees.push({empId,name,dept,email,salary});
+    localStorage.setItem("employees",JSON.stringify(employees));
+
+    form.reset();
+    renderTable();
+});
+
+function renderTable(){
+    table.innerHTML="";
+    employees.forEach((emp,index)=>{
+        table.innerHTML+=`
+            <tr>
+                <td>${index+1}</td>
+                <td>${emp.empId}</td>
+                <td>${emp.name}</td>
+                <td>${emp.dept}</td>
+                <td>${emp.email}</td>
+                <td>₹ ${emp.salary}</td>
+                <td>
+                    <button class="delete-btn" onclick="deleteEmployee(${index})">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function deleteEmployee(index){
+    if(confirm("Are you sure you want to delete this record?")){
+        employees.splice(index,1);
+        localStorage.setItem("employees",JSON.stringify(employees));
+        renderTable();
+    }
+}
+
+renderTable();
+</script>
+
+</body>
+</html>
